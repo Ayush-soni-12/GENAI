@@ -1,9 +1,10 @@
+from unittest import result
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_huggingface import ChatHuggingFace,HuggingFaceEndpoint
 from dotenv import load_dotenv
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableSequence,RunnableParallel
+from langchain_core.runnables import RunnableSequence,RunnableParallel,RunnablePassthrough
 
 load_dotenv()
 
@@ -20,20 +21,25 @@ model2 = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 parser = StrOutputParser()
 
 prompt1 = PromptTemplate(
-    template='Generate a tweet on  {topic}',
+    template='Generate a joke on  {topic}',
     input_variables=['topic']
 )
 
 prompt2 = PromptTemplate(
-    template="Generate a linkdin short post on {topic}",
-    input_variables=['topic']
+    template= 'write a short explaination on text {text}',
+    input_variables=['text']
 )
 
-chain = RunnableParallel(
-    chain1 = prompt1 | model1 | parser,
-    chain2 = prompt2 | model2 | parser
+joke_chain = RunnableSequence(prompt1,model1,parser)
+
+parallel_chain = RunnableParallel(
+    chain1 = RunnablePassthrough(),
+    chain2 = RunnableSequence(prompt2,model2,parser)
+
 )
 
+chain = joke_chain | parallel_chain
 result = chain.invoke({'topic':'AI'})
-print(f'Tweet : {result['chain1']}')
-print(f'Linkdin Post : {result['chain2']}')
+
+print("JOKE : ",result['chain1'])
+print("EXPLAINATION : " , result['chain2'])
