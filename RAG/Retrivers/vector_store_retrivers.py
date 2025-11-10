@@ -1,4 +1,3 @@
-from huggingface_hub import enable_webhook
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_classic.schema import Document
@@ -40,6 +39,8 @@ vector_store = Chroma(
     embedding_function=embeddings,
 )
 
+
+
 # 5. Add documents into Chroma
 
 
@@ -50,7 +51,16 @@ vector_store.add_documents(docs)
 # 2 with the help of retrivers we use many algorithm to search the relevant query but in similarity_search only one algo follow it match all vector 
 
 
-retrivers = vector_store.as_retriever(search_kwargs={"k":2})
+# retrivers = vector_store.as_retriever(search_kwargs={"k":2})
+
+retrivers = vector_store.as_retriever(
+    search_type="mmr", # this enable mmr it is a technique to get relvant document it first pick the most releavent document then it again pick the relevent document but it is less similar to first document through this way same meaning of document avoid
+    search_kwargs={"k":2,"lambda_mult":0.5}
+
+    
+)
+
+
 
 query = "What is AI"
 
