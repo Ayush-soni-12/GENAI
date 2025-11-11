@@ -1,4 +1,3 @@
-from importlib import metadata
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_classic.schema import Document
@@ -35,7 +34,7 @@ doc5 = Document(
 docs = [doc1, doc2, doc3, doc4, doc5]
 
 # 4. Create (or load) a Chroma vector store
-vector_store = Chroma(
+vector_store = Chroma( 
     collection_name="Chroma_collection",
     embedding_function=embeddings,
     persist_directory="./chroma_langchain_db",  # directory where data is saved

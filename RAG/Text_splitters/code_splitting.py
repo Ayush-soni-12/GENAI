@@ -1,5 +1,4 @@
-import langchain
-from langchain_text_splitters import RecursiveCharacterTextSplitter , Language
+from langchain_text_splitters import RecursiveCharacterTextSplitter , Language 
 
 text = """
 class Dog:
