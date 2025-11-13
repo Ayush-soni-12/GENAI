@@ -12,17 +12,17 @@ document.getElementById("save").addEventListener("click", () => {
   const status = document.getElementById("status");
 
   if (!apiKey) {
-    showStatus("⚠️ Please enter an API key!", "error");
+    showStatus("Please enter an API key!", "error");
     return;
   }
 
   if (!apiKey.startsWith("AIza")) {
-    showStatus("⚠️ Please enter a valid Gemini API key!", "error");
+    showStatus("Please enter a valid Gemini API key!", "error");
     return;
   }
 
   chrome.storage.sync.set({ apiKey }, () => {
-    showStatus("✅ API Key saved successfully!", "success");
+    showStatus("API Key saved successfully!", "success");
     
     setTimeout(() => {
       status.classList.add("status-hidden");
