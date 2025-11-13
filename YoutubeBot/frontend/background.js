@@ -17,30 +17,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return;
         }
 
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ 
-                parts: [{ 
-                  text: `You are a helpful YouTube assistant. Please provide clear, concise, and helpful responses about YouTube videos. 
-                  
-User's question: ${question}
-
-Please respond in a friendly, informative tone. Focus on being helpful and accurate.` 
-                }] 
-              }],
-              generationConfig: {
-                temperature: 0.7,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 1024,
-              }
-            }),
-          }
-        );
+       const res = await fetch("http://localhost:8000/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question,
+            videoId
+          }),
+        });
+         
+        console.log("Gemini API Response Status:", res);
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -60,10 +46,8 @@ Please respond in a friendly, informative tone. Focus on being helpful and accur
         }
 
         const responseData = await res.json();
-        const answer = responseData?.candidates?.[0]?.content?.parts?.[0]?.text || 
-                      "I couldn't generate a response. Please try again.";
-
-        sendResponse({ answer });
+        console.log("Gemini Response Data:", responseData);
+        sendResponse({ answer: responseData.answer });
       } catch (err) {
         console.error("Error in askGemini:", err);
         sendResponse({ 

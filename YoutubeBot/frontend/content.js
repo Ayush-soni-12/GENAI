@@ -8,7 +8,7 @@ console.log('YouTube AI Assistant: Content script loaded');
 document.addEventListener('DOMContentLoaded', init);
 // Also initialize when YouTube updates (SPA navigation)
 window.addEventListener('yt-navigate-finish', init);
-window.addEventListener('spfrequest', init); // For older YouTube
+window.addEventListener('spfrequest}")"', init); // For older YouTube
 window.addEventListener('spfdone', init); // For older YouTube
 
 function init() {
