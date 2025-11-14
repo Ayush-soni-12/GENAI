@@ -387,7 +387,7 @@ function sendQuestionToAI() {
             } else if (res.answer) {
                 showResponse(res.answer);
             } else {
-                showError('Unexpected response format from AI service.');
+                showError(res,'Unexpected response format from AI service.');
             }
         }
     );

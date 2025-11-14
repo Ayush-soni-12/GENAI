@@ -34,40 +34,54 @@ class AskRequest(BaseModel):
 
 embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
 
+
+def load_or_create_vectorstore(videoId: str):
+    """Load vector store if available, otherwise create it."""
+
+    collection_name = f"youtube_{videoId}"
+
+    vector_store = Chroma(
+        collection_name=collection_name,
+        embedding_function=embeddings,
+        persist_directory="chroma_db"
+    )
+    
+    # Check if the collection already has data
+    existing = vector_store.get()
+    if existing and len(existing["ids"]) > 0:
+        print("✅ Using existing vector store for video:", videoId)
+        return vector_store, False  # No need to reload transcript
+
+    print("🆕 Creating new vector store for video:", videoId)
+
+    # Load new transcript
+    loader = YoutubeLoader.from_youtube_url(
+        f"https://www.youtube.com/watch?v={videoId}",
+        language=["en", "id", "hi"],
+    )
+
+    docs = loader.load()
+    if not docs:
+        raise Exception("No transcript found or translation not available.")
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
+    chunks = splitter.split_documents(docs)
+
+    print("Hello ")
+
+    vector_store.add_documents(chunks)
+    # vector_store.persist()
+
+    print("hello world")
+    return vector_store, True
+
+
 @app.post("/ask")
 async def ask_ai(req: AskRequest):
     try:
-        # ✅ Ask youtube_transcript_api to translate directly
-        loader = YoutubeLoader.from_youtube_url(
-            f"https://www.youtube.com/watch?v={req.videoId}",
-             language=["en", "id","hi"],
+        vector_store, created = load_or_create_vectorstore(req.videoId)
 
-        )
-
-        docs = loader.load()
-
-        if not docs:
-            raise Exception("No transcript found or translation not available for this video.")
-
-        splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2000,
-            chunk_overlap=200
-        )
-        chunks = splitter.split_documents(docs)
-
-        # print("Chunks : ",chunks)
-
-        transcript_text = " ".join([chunk.page_content for chunk in chunks])
-        print("✅ Final Transcript (Auto-Translated to English):\n")
-        # print(transcript_text[:1000], "...")
-
-        # 4. Create (or load) a Chroma vector store
-        vector_store = Chroma( 
-            collection_name="Chroma_collection",
-            embedding_function=embeddings,
-        )
-
-        vector_store.add_documents(chunks)
+        print("📌 Transcript loaded:", "New" if created else "From Cache")
 
         multiquery_retriever = MultiQueryRetriever.from_llm(
         retriever=vector_store.as_retriever(search_type="similarity",search_kwargs={"k": 5}),
