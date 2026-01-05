@@ -21,3 +21,4 @@ embeddings = HuggingFaceEndpointEmbeddings(
 
 vector = embeddings.embed_documents(["Delhi is the capital of India","hello"])
 print(str(vector))  # print first 10 values
+
